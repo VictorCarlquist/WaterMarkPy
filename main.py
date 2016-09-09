@@ -57,13 +57,46 @@ def MergeImgs(mainImg, wmImg, position):
     newImg.paste(wmImg, position, wmImg)
     return newImg
 
+def MergeImgsNegativeGray(mainImg, wmImg, position):
+    newImg = mainImg
+    wmImg = wmImg.convert("RGBA")
+    wmin, hmin = position 
+    wmax, hmax = position
+    waux, haux =  wmImg.size
+    wmax = wmax + waux
+    hmax = hmax + haux
+
+    wWm, hWm  = wmImg.size
+
+    avgP = 0
+    for y in range(hmin, hmax):
+        for x in range(wmin, wmax):
+            rgb = newImg.getpixel((x, y))
+            # Calculate AVG Luminance
+            avgP = avgP + rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
+    
+    avgP = avgP / ((hmax - hmin) * (wmax - wmin))
+    if avgP > 128:
+        ratio = 128/avgP * 0.7
+    else:
+        ratio = 128/avgP * 1.3
+
+    for y in range(hmin, hmax):
+        for x in range(wmin, wmax):
+            r, g, b, a = wmImg.getpixel((x - wmin, y - hmin))
+            r = int(r * ratio)
+            g = int(g * ratio)
+            b = int(b * ratio)
+            wmImg.putpixel((x - wmin, y - hmin), (r, g, b, a))
+
+    newImg = MergeImgs(mainImg, wmImg, position)
+    return newImg
 
 def MarginWatermark(mainImg, marginRatioTop, marginRatioLeft):
     wmain, hmain = mainImg.size
     px = int(wmain * float(marginRatioLeft)/100.0)
     py = int(hmain * float(marginRatioTop)/100.0)
     return px, py
-
 
 def SaveImg(img, pathImg, prefix):
     nname = prefix + os.path.basename(pathImg).split('.')[0] + ".jpg"
@@ -79,7 +112,8 @@ def SaveImg(img, pathImg, prefix):
     print "Saving " + nname
 
 
-def BatchImgCenter(pathImgs, pathWM, prefix):
+## PUBLIC
+def BatchImgCenter(pathImgs, pathWM, prefix, isNegative):
     for ext in ("*.bmp", "*.BMP", "*.jpg", "*.JPG", "*.jpeg", "*.JPEG", "*.gif", "*.GIF", "*.png", "*.PNG"):
         for file in glob.glob(pathImgs + ext):
             print(file.split('.')[0])
@@ -87,11 +121,14 @@ def BatchImgCenter(pathImgs, pathWM, prefix):
             watermark = Image.open(pathWM)
             
             imgCentered = CenterWatermark(main, watermark)
-            main = MergeImgs(main, imgCentered['wm'], imgCentered['pos'])
+            if isNegative:
+                main = MergeImgsNegativeGray(main, imgCentered['wm'], imgCentered['pos'])
+            else:
+                main = MergeImgs(main, imgCentered['wm'], imgCentered['pos'])
             SaveImg(main, file, prefix)
 
 
-def BatchImgCustom(pathImgs, pathWM, ratioSize, marginTop, marginLeft, prefix):
+def BatchImgCustom(pathImgs, pathWM, ratioSize, marginTop, marginLeft, prefix, isNegative):
     for ext in ("*.bmp", "*.BMP", "*.jpg", "*.JPG", "*.jpeg", "*.JPEG", "*.gif", "*.GIF", "*.png", "*.PNG"):
         for file in glob.glob(pathImgs + ext):
             print(file.split('.')[0])
@@ -100,27 +137,36 @@ def BatchImgCustom(pathImgs, pathWM, ratioSize, marginTop, marginLeft, prefix):
             
             imgCustom = ResizeRelativeGlobalWatermark(main, watermark, ratioSize)
             px, py = MarginWatermark(main, marginTop, marginLeft)
-            
-            main = MergeImgs(main, imgCustom, (px, py))
+            if isNegative:
+                main = MergeImgsNegativeGray(main, imgCustom, (px, py))
+            else:
+                main = MergeImgs(main, imgCustom, (px, py))
+
             SaveImg(main, file, prefix)
 
-def ImgCenter(pathImg, pathWM, outputName):
+def ImgCenter(pathImg, pathWM, outputName, isNegative):
     main = Image.open(pathImg)
     watermark = Image.open(pathWM)
     imgCentered = CenterWatermark(main, watermark)
-    main = MergeImgs(main, imgCentered['wm'], imgCentered['pos'])
+    if isNegative:
+        main = MergeImgsNegativeGray(main, imgCentered['wm'], imgCentered['pos'])
+    else:
+        main = MergeImgs(main, imgCentered['wm'], imgCentered['pos'])
     SaveImg(main, outputName, "")
 
-def imgCustom(pathImg, pathWM, ratioSize, marginTop, marginLeft, outputName):
-    print 'custom'
+
+def ImgCustom(pathImg, pathWM, ratioSize, marginTop, marginLeft, outputName):
     main = Image.open(pathImg)
     watermark = Image.open(pathWM)
     
     imgCustom = ResizeRelativeGlobalWatermark(main, watermark, ratioSize)
     px, py = MarginWatermark(main, marginTop, marginLeft)
-    
-    main = MergeImgs(main, imgCustom, (px, py))
+    if isNegative:
+        main = MergeImgsNegativeGray(main, imgCustom, (px, py))
+    else:
+        main = MergeImgs(main, imgCustom, (px, py))
     SaveImg(main, outputName, "")
+
 
 def help():
     print "### WaterMarkPy permite adicionar marcas daguas em imagens ###"
@@ -150,7 +196,11 @@ def help():
     print "\t tamanho da imagem principal."
     print "\t-mt Margem TOP em %.                       ex: -mt 20"
     print "\t-ml Margem LEFT em %.                      ex: -ml 20"
+    print "\t-negative Realca a marca dagua,            ex: -negative"
+    print "\t escurecendo a imagem em fundo claro e"
+    print "\t clareando em fundo escuro."
     print "\t-p Adicionar um prefixo no nome da imagem. ex: -p water"
+    print
 
 def main():
     mainImg = None
@@ -161,6 +211,7 @@ def main():
     scale = None
     mt = None
     ml = None
+    negative = False
 
     index = 1
     while index < len(sys.argv):
@@ -189,23 +240,25 @@ def main():
         elif arg == '-ml':
             index = index + 1
             ml = sys.argv[index]
+        elif arg == '-negative':
+            negative = True 
         index = index + 1
 
     # batch images to center water (-d -w)
     if dirImgs and watermarkPath and not scale:
-        BatchImgCenter(dirImgs, watermarkPath, prefix)
+        BatchImgCenter(dirImgs, watermarkPath, prefix, negative)
     
     # (-d -w -s -mt -ml)
     elif dirImgs and watermarkPath and scale and mt and ml:
-        BatchImgCustom(dirImgs, watermarkPath, scale, mt, ml, prefix)
+        BatchImgCustom(dirImgs, watermarkPath, scale, mt, ml, prefix, negative)
     
     # (-i -w -o)
     elif mainImg and watermarkPath and outputName and not scale:
-        ImgCenter(mainImg, watermarkPath, outputName)
+        ImgCenter(mainImg, watermarkPath, outputName, negative)
 
     # (-i -w -o -s -mt -ml)
     elif mainImg and watermarkPath and outputName and scale and mt and ml:
-        imgCustom(mainImg, watermarkPath, scale, mt, ml, outputName)
+        ImgCustom(mainImg, watermarkPath, scale, mt, ml, outputName, negative)
     else:
         help()
 

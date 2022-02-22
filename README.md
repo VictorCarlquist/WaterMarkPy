@@ -2,31 +2,61 @@
 Add watermark in multiple images at once.
 
 ##WaterMarkPy permite adicionar marcas d'águas em imagens
-Para adicionar a marca no centro de UMA imagem, execute:
+
+To add a watermark in the center of one image, run:
 > python main.py -i nomeImagem.bmp -w nomeWM.png -o nomeSaida
 
-Para adicionar a marca no centro de diversas imagens em um diretorio, execute:
+* -i: path to image
+* -w: path to watermark image
+* -o: name of the output image
+
+To add a watermark in the center of multiples images in a folder, run:
 > python main.py -d imgs/ -w nomeWM.png
 
-Para alterar o tamanho da marca (escala (em %)) e definir a margem TOP (em %) e LEFT(em %) do local da marca em UMA imagem, execute:
+* -d: path to folder
+* -w: path to watermark image
+
+To scale (resize) the watermark image and define a relative position in one image, run:
+
 > python main.py -i imgs/nomeImagem.bmp -w nomeWM.png -s 10 -mt 25 -ml 25 -o nomeSaida
 
-Para alterar o tamanho da marca (escala (%)) e definir a margem TOP (%) e LEFT (%) do local da marca em varias imagens em um diretorio, execute:
+* -i: path to image
+* -w: path to watermark image
+* -s: % scale size to watermark image
+* -mt: position in % from TOP margin
+* -ml: position in % from LEFT margin
+* -o: name of the output image
+
+To scale (resize) the watermark image and define a relative position in multiples image in a folder, run:
+
 > python main.py -d imgs/ -w nomeWM.png -s 30 -mt 25 -ml 25
 
-Parametros: 
+* -d: path to folder
+* -w: path to watermark image
+* -s: % scale size to watermark image
+* -mt: position in % from TOP margin
+* -ml: position in % from LEFT margin
 
-> -i Nome da imagem principal.               ex: -i imagem/img.bmp
 
-> -w Nome da imagem da watermark.            ex: -i imagem/wm.bmp
+Parameters:
 
-> -d Diretorio com imagens sem a marca.      ex: -d imagem/
+> -i path to image
+>> ex: -i imagem/img.bmp
 
-> -s scale (em %) da marca em relacao ao     ex: -s 30
-tamanho da imagem principal."
+> -w path to watermark image
+>> ex: -i imagem/wm.bmp
 
-> -mt Margem TOP em %.                       ex: -mt 20
+> -d path to folder with image
+>> ex: -d imagem/
 
-> -ml Margem LEFT em %.                      ex: -ml 20
+> -s scale/resize (in %) watermark considering the dimensions of the main image
+>> ex: -s 30
 
-> -p Adicionar um prefixo no nome da imagem. ex: -p water
+> -mt Margin TOP in %.
+>> ex: -mt 20
+
+> -ml Margin LEFT in %.
+>> ex: -ml 20
+
+> -p Add a prefix in the name of output image in a batch operation.
+>> ex: -p water

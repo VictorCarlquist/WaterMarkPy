@@ -44,12 +44,9 @@ jobs:
     on: [push]
     jobs:
       run:
-        runs-on: ${{ matrix.os }}
-        strategy:
-          matrix:
-            os: [ubuntu-latest, macos-latest, windows-latest]
+        runs-on: ubuntu-latest
         env:
-          OS: ${{ matrix.os }}
+          OS: ubuntu-latest
           PYTHON: '3.7'
         steps:
         - uses: actions/checkout@master

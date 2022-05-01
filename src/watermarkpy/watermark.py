@@ -1,3 +1,4 @@
+"""System module."""
 # The MIT License (MIT)
 
 # Copyright (c) 2016 Victor Carlquist
@@ -20,9 +21,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import glob
+import os
+import sys
+
 from re import A
 from PIL import Image
-import glob, os, sys
 
 
 class WMImage:
@@ -33,56 +37,54 @@ class WMImage:
         self.im_watermark = im_watermark.convert("RGBA")
 
     @staticmethod
-    def _centerWatermark(mainImg, wmImg, ratioSize=100):
-        wmImg = WMImage._resizeRelativeGlobalWatermark(mainImg, wmImg, ratioSize)
-        wmain, hmain = mainImg.size
-        wwater, hwater = wmImg.size
+    def _centerWatermark(main_img, wm_img, scale=100):
+        wm_img = WMImage._resizeRelativeGlobalWatermark(main_img, wm_img, scale)
+        wmain, hmain = main_img.size
+        wwater, hwater = wm_img.size
 
         # calculate new watermark's position
         px = wmain / 2 - wwater / 2
         py = hmain / 2 - hwater / 2
 
-        watermark = wmImg.resize((wwater, hwater), Image.Resampling.LANCZOS)
+        watermark = wm_img.resize((wwater, hwater), Image.Resampling.LANCZOS)
         return {"wm": watermark, "pos": (px, py)}
 
     @staticmethod
-    def _resizeRelativeGlobalWatermark(mainImg, wmImg, ratioSize):
-        wmain, hmain = mainImg.size
-        wwater, hwater = wmImg.size
+    def _resizeRelativeGlobalWatermark(main_img, wm_img, scale):
+        wmain, hmain = main_img.size
+        wwater, hwater = wm_img.size
 
-        ratio = (
-            min(wmain / float(wwater), hmain / float(hwater)) * float(ratioSize) / 100
-        )
+        ratio = min(wmain / float(wwater), hmain / float(hwater)) * float(scale) / 100
         wwater = int(ratio * wwater)
         hwater = int(ratio * hwater)
 
-        watermark = wmImg.resize((wwater, hwater), Image.Resampling.LANCZOS)
+        watermark = wm_img.resize((wwater, hwater), Image.Resampling.LANCZOS)
         return watermark
 
     @staticmethod
-    def _mergeImgs(mainImg, wmImg, position, alpha=255):
-        newImg = mainImg.copy()
+    def _mergeImgs(main_img, wm_img, position, alpha=255):
+        new_img = main_img.copy()
         x, y = position
-        wmImg.putalpha(alpha)
-        newImg.paste(wmImg, (int(x), int(y)), wmImg)
-        return newImg
+        wm_img.putalpha(alpha)
+        new_img.paste(wm_img, (int(x), int(y)), wm_img)
+        return new_img
 
     @staticmethod
-    def _mergeImgsNegativeGray(mainImg, wmImg, position, alpha):
-        newImg = mainImg.copy()
-        wmImg = wmImg.copy()
+    def _mergeImgsNegativeGray(main_img, wm_img, position, alpha):
+        new_img = main_img.copy()
+        wm_img = wm_img.copy()
         wmin, hmin = position
-        waux, haux = wmImg.size
+        waux, haux = wm_img.size
         wmax = wmin + waux
         hmax = hmin + haux
 
-        mainW, mainH = newImg.size
+        mainW, mainH = new_img.size
 
         avgP = 0
         for y in range(int(hmin), int(hmax)):
             for x in range(int(wmin), int(wmax)):
                 if x < mainW and y < mainH:
-                    rgb = newImg.getpixel((x, y))
+                    rgb = new_img.getpixel((x, y))
                     # Calculate AVG Luminance
                     avgP = avgP + rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
 
@@ -95,24 +97,24 @@ class WMImage:
 
         for y in range(int(hmin), int(hmax)):
             for x in range(int(wmin), int(wmax)):
-                r, g, b, a = wmImg.getpixel((x - wmin, y - hmin))
+                r, g, b, a = wm_img.getpixel((x - wmin, y - hmin))
                 r = int(r * ratio)
                 g = int(g * ratio)
                 b = int(b * ratio)
-                wmImg.putpixel((int(x - wmin), int(y - hmin)), (r, g, b, a))
+                wm_img.putpixel((int(x - wmin), int(y - hmin)), (r, g, b, a))
 
-        newImg = WMImage._mergeImgs(mainImg, wmImg, position, alpha)
-        return newImg
+        new_img = WMImage._mergeImgs(main_img, wm_img, position, alpha)
+        return new_img
 
     @staticmethod
-    def _marginWatermark(mainImg, marginRatioTop, marginRatioLeft):
-        wmain, hmain = mainImg.size
-        px = int(wmain * float(marginRatioLeft) / 100.0)
-        py = int(hmain * float(marginRatioTop) / 100.0)
+    def _marginWatermark(main_img, margin_ratio_top, margin_ratio_left):
+        wmain, hmain = main_img.size
+        px = int(wmain * float(margin_ratio_left) / 100.0)
+        py = int(hmain * float(margin_ratio_top) / 100.0)
         return px, py
 
     @staticmethod
-    def _saveImg(img, filename="", prefix=""):
+    def saveImg(img, filename="", prefix=""):
         dirname = os.path.dirname(filename)
         if dirname:
             dirname += "/"
@@ -121,7 +123,7 @@ class WMImage:
 
     @staticmethod
     def batchWMImageCenter(
-        pathImgs, pathWM, prefix, ratioSize=100, alpha=255, adjustColor=False
+        path_imgs, path_wm, prefix, scale=100, alpha=255, adjust_color=False
     ):
         images = []
         for ext in (
@@ -136,24 +138,24 @@ class WMImage:
             "*.png",
             "*.PNG",
         ):
-            for path in glob.glob(pathImgs + ext):
-                with Image.open(path) as main, Image.open(pathWM) as watermark:
+            for path in glob.glob(path_imgs + ext):
+                with Image.open(path) as main, Image.open(path_wm) as watermark:
                     vm_obj = WMImage(main, watermark)
-                    WMImageCentered = WMImage._centerWatermark(
-                        vm_obj.im_main, vm_obj.im_watermark, ratioSize
+                    wm_image_centered = WMImage._centerWatermark(
+                        vm_obj.im_main, vm_obj.im_watermark, scale
                     )
-                    if adjustColor:
+                    if adjust_color:
                         main = WMImage._mergeImgsNegativeGray(
                             vm_obj.im_main,
-                            WMImageCentered["wm"],
-                            WMImageCentered["pos"],
+                            wm_image_centered["wm"],
+                            wm_image_centered["pos"],
                             alpha,
                         )
                     else:
                         main = WMImage._mergeImgs(
                             vm_obj.im_main,
-                            WMImageCentered["wm"],
-                            WMImageCentered["pos"],
+                            wm_image_centered["wm"],
+                            wm_image_centered["pos"],
                             alpha,
                         )
                     images.append((main, vm_obj.im_main_filename, prefix))
@@ -161,14 +163,14 @@ class WMImage:
 
     @staticmethod
     def batchWMImage(
-        pathImgs,
-        pathWM,
+        path_imgs,
+        path_wm,
         marginTop,
         marginLeft,
         prefix,
-        ratioSize=100,
+        scale=100,
         alpha=255,
-        adjustColor=False,
+        adjust_color=False,
     ):
         images = []
         for ext in (
@@ -183,16 +185,16 @@ class WMImage:
             "*.png",
             "*.PNG",
         ):
-            for path in glob.glob(pathImgs + ext):
-                with Image.open(path) as main, Image.open(pathWM) as watermark:
+            for path in glob.glob(path_imgs + ext):
+                with Image.open(path) as main, Image.open(path_wm) as watermark:
                     vm_obj = WMImage(main, watermark)
                     im_wm = WMImage._resizeRelativeGlobalWatermark(
-                        vm_obj.im_main, vm_obj.im_watermark, ratioSize
+                        vm_obj.im_main, vm_obj.im_watermark, scale
                     )
                     px, py = WMImage._marginWatermark(
                         vm_obj.im_main, marginTop, marginLeft
                     )
-                    if adjustColor:
+                    if adjust_color:
                         main = WMImage._mergeImgsNegativeGray(
                             vm_obj.im_main, im_wm, (px, py), alpha
                         )
@@ -203,61 +205,62 @@ class WMImage:
                     images.append((main, path, prefix))
         return images
 
-    def createWMCenter(self, ratioSize=100, alpha=255, adjustColor=False):
+    def createWMCenter(self, scale=100, alpha=255, adjust_color=False):
         main = self.im_main
         watermark = self.im_watermark
-        WMImageCentered = WMImage._centerWatermark(main, watermark, ratioSize)
-        if adjustColor:
+        wm_image_centered = WMImage._centerWatermark(main, watermark, scale)
+        if adjust_color:
             main = WMImage._mergeImgsNegativeGray(
-                main, WMImageCentered["wm"], WMImageCentered["pos"], alpha
+                main, wm_image_centered["wm"], wm_image_centered["pos"], alpha
             )
         else:
             main = WMImage._mergeImgs(
-                main, WMImageCentered["wm"], WMImageCentered["pos"], alpha
+                main, wm_image_centered["wm"], wm_image_centered["pos"], alpha
             )
         return main
 
     def createWMCustom(
-        self, marginTop, marginLeft, ratioSize=100, alpha=255, adjustColor=False
+        self, marginTop, marginLeft, scale=100, alpha=255, adjust_color=False
     ):
         main = self.im_main
         watermark = self.im_watermark
 
-        im_wm = WMImage._resizeRelativeGlobalWatermark(main, watermark, ratioSize)
+        im_wm = WMImage._resizeRelativeGlobalWatermark(main, watermark, scale)
         px, py = WMImage._marginWatermark(main, marginTop, marginLeft)
-        if adjustColor:
+        if adjust_color:
             main = WMImage._mergeImgsNegativeGray(main, im_wm, (px, py), alpha)
         else:
             main = WMImage._mergeImgs(main, im_wm, (px, py), alpha)
         return main
 
 
-def help():
+def helpMessages():
     print("### WaterMarkPy allows to add watermark in images ###")
-    print
+    print()
     print("To add a watermark in the center of one image, run:")
-    print
+    print()
     print("> python main.py -i nameMain.bmp -w nameWM.png -o name_output")
-    print
+    print()
     print("To add a watermark in the center of multiples images in a folder, run:")
-    print
+    print()
     print("> python main.py -d imgs/ -w nomeWM.png")
-    print
+    print()
     print(
         "To scale (resize) the watermark image and define a relative position in one image, run:"
     )
-    print
+    print()
     print(
         "> python main.py -i imgs/name.bmp -w nameWM.png -s 10 -mt 25 -ml 25 -o nomeSaida"
     )
-    print
+    print()
     print(
-        "To scale (resize) the watermark image and define a relative position in multiples image in a folder, run:"
+        "To scale (resize) the watermark image and define a"
+        "relative position in multiples image in a folder, run:"
     )
-    print
+    print()
     print("> python main.py -d imgs/ -w nameWM.png -s 30 -mt 25 -ml 25")
-    print
-    print
+    print()
+    print()
     print("\tParameters: ")
     print("\t-i path to image.                          ex: -i img/img.bmp")
     print("\t-w path to watermark image.                ex: -i img/wm.bmp")
@@ -266,15 +269,15 @@ def help():
     print("\t proportional of the main image.")
     print("\t-mt margin TOP in %.                       ex: -mt 20")
     print("\t-ml margem LEFT in %.                      ex: -ml 20")
-    print("\t-negative invert colors of the watermark   ex: -negative")
+    print("\t-adjust color of the watermark             ex: -adjust")
     print("\t considering bg color of the main image")
     print("\t-p Add a prefix in the name of output      ex: -p water")
     print("\t image in a batch operation.")
-    print
+    print()
 
 
 def main():
-    mainImg = None
+    main_img = None
     outputName = None
     dirImgs = None
     prefix = ""
@@ -289,7 +292,7 @@ def main():
         arg = sys.argv[index]
         if arg == "-i":
             index = index + 1
-            mainImg = sys.argv[index]
+            main_img = sys.argv[index]
         elif arg == "-o":
             index = index + 1
             outputName = sys.argv[index]
@@ -315,7 +318,7 @@ def main():
             index = index + 1
             alpha = int(sys.argv[index])
         elif arg == "-adjust":
-            negative = True
+            adjust = True
         index = index + 1
 
     # batch images to center water (-d -w)
@@ -324,7 +327,7 @@ def main():
             dirImgs, watermarkPath, prefix, alpha, adjust
         )
         for img, path, prefix in images:
-            WMImage._saveImg(img, path, prefix)
+            WMImage.saveImg(img, path, prefix)
 
     # (-d -w -s -mt -ml)
     elif dirImgs and watermarkPath and scale and mt and ml:
@@ -332,24 +335,24 @@ def main():
             dirImgs, watermarkPath, mt, ml, prefix, scale, alpha, adjust
         )
         for img, path, prefix in images:
-            WMImage._saveImg(img, path, prefix)
+            WMImage.saveImg(img, path, prefix)
 
     # (-i -w -s -o)
-    elif mainImg and watermarkPath and outputName and scale and not mt and not ml:
-        with Image.open(mainImg) as main, Image.open(watermarkPath) as wm:
-            main = Image.open(mainImg)
+    elif main_img and watermarkPath and outputName and scale and not mt and not ml:
+        with Image.open(main_img) as main, Image.open(watermarkPath) as wm:
+            main = Image.open(main_img)
             wm_obj = WMImage(main, wm)
             img = wm_obj.createWMCenter(scale, alpha, adjust)
-            WMImage._saveImg(img, outputName)
+            WMImage.saveImg(img, outputName)
 
     # (-i -w -o -s -mt -ml)
-    elif mainImg and watermarkPath and outputName and scale and mt and ml:
-        with Image.open(mainImg) as main, Image.open(watermarkPath) as wm:
+    elif main_img and watermarkPath and outputName and scale and mt and ml:
+        with Image.open(main_img) as main, Image.open(watermarkPath) as wm:
             wm_obj = WMImage(main, wm)
             img = wm_obj.createWMCustom(mt, ml, scale, alpha, adjust)
-            WMImage._saveImg(img, outputName)
+            WMImage.saveImg(img, outputName)
     else:
-        help()
+        helpMessages()
 
 
 if __name__ == "__main__":

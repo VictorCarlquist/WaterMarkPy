@@ -1,0 +1,16 @@
+*.pyc
+*.swp
+*.egg-info/
+.tox/
+dist/
+env/
+__pycache__/
+new.jpg
+
+
+# Code coverage artifacts
+.coverage*
+coverage.xml
+
+# Editors / IDEs
+.vscode/

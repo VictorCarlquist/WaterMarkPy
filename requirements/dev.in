@@ -1,0 +1,6 @@
+Pillow >= 5.0.0
+pytest
+flake8
+pre-commit
+black
+tox

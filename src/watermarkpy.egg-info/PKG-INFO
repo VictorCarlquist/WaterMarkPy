@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: watermarkpy
+Version: 0.9.0
+Summary: Add watermark in one or multiple images at once.
+Home-page: https://github.com/VictorCarlquist/WaterMarkPy
+Author: Victor Carlquist
+Author-email: victorcarlquist@gmail.com
+License: UNKNOWN
+Project-URL: Bug Tracker, https://github.com/VictorCarlquist/WaterMarkPy/issues
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # WaterMarkPy
 Add watermark in multiple images at once.
 

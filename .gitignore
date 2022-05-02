@@ -1,10 +1,10 @@
 *.pyc
 *.swp
-*.egg-info/*
-.tox/*
+*.egg-info/
+.tox/
 dist/*
-env/*
-__pycache__/*
+env/
+__pycache__/
 new.jpg
 
 

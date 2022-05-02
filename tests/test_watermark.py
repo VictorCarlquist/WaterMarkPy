@@ -1,5 +1,4 @@
 import sys
-import watermarkpy
 from watermarkpy import watermark
 from watermarkpy.watermark import WMImage
 from PIL import Image

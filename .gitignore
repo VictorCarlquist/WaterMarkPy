@@ -1,10 +1,10 @@
 *.pyc
 *.swp
-*.egg-info/
-.tox/
-dist/
-env/
-__pycache__/
+*.egg-info/*
+.tox/*
+dist/*
+env/*
+__pycache__/*
 new.jpg
 
 
@@ -13,4 +13,4 @@ new.jpg
 coverage.xml
 
 # Editors / IDEs
-.vscode/
+.vscode/*

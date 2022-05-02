@@ -11,52 +11,140 @@ Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.6
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
 
-# WaterMarkPy
-Add watermark in multiple images at once.
+![example workflow](https://github.com/VictorCarlquist/WaterMarkPy/actions/workflows/python-package.yml/badge.svg)
+[![codecov](https://codecov.io/gh/VictorCarlquist/WaterMarkPy/branch/master/graph/badge.svg?token=3H4HQ9CEHN)](https://codecov.io/gh/VictorCarlquist/WaterMarkPy)
 
-##WaterMarkPy permite adicionar marcas d'águas em imagens
+
+# WaterMarkPy
+
+---
+
+WaterMarkPy is a simple free open-source library to add watermark in images. The WaterMarkPy keeps the watermark in the same locate and in the same size in the image despite of the image resolution, because the WaterMarkPy uses percent (\%) unit to position the watermark.
+
+---
+To add a watermark in the center of one image, run:
+
+```python
+from watermarkpy.watermark import WMImage
+
+main_image = "img/ship.jpg"
+watermark = "img/shipwm.jpg"
+
+with Image.open(main_image) as main, Image.open(watermark) as wm:
+    wm = WMImage(main, wm)
+    img = wm.createWMCenter()
+    img.save("new.jpg", "JPEG")
+```
+
+---
+
+To add a watermark in the center of one image with a different scale and alpha, run:
+
+```python
+from watermarkpy.watermark import WMImage
+
+main_image = "img/ship.jpg"
+watermark = "img/shipwm.jpg"
+
+with Image.open(main_image) as main, Image.open(watermark) as wm:
+    wm = WMImage(main, wm)
+    img = wm.createWMCenter(scale=25, alpha=120)
+    img.save("new.jpg", "JPEG")
+```
+Parameters:
+```
+scale = [0% - 100%]
+alpha = [0 - 255]
+```
+
+To add a watermark in a diffente position, run:
+
+```python
+from watermarkpy.watermark import WMImage
+
+main_image = "img/ship.jpg"
+watermark = "img/shipwm.jpg"
+
+with Image.open(main_image) as main, Image.open(watermark) as wm:
+    wm = WMImage(main, wm)
+    img = wm.createWMCustom(marginTop=70 marginLeft=60, scale=25, alpha=120)
+    img.save("new.jpg", "JPEG")
+```
+Parameters:
+```
+marginTop = [0% - 100%]
+marginLeft = [0% - 100%]
+scale = [0% - 100%]
+alpha = [0 - 255]
+```
+
+To add a watermark and improve the brightness based in the brightness of the background region, run:
+```python
+from watermarkpy.watermark import WMImage
+
+main_image = "img/ship.jpg"
+watermark = "img/shipwm.jpg"
+
+with Image.open(main_image) as main, Image.open(watermark) as wm:
+    wm = WMImage(main, wm)
+    img = wm.createWMCustom(marginTop=70 marginLeft=60, adjust_color=True)
+    img.save("new.jpg", "JPEG")
+```
+
+Parameters:
+```
+marginTop = [0% - 100%]
+marginLeft = [0% - 100%]
+adjust_color = [True, False]
+```
+---
 
 To add a watermark in the center of one image, run:
-> python main.py -i name.bmp -w nameWM.png -o name_output
 
+> python main.py -i name.bmp -w nameWM.png -o name_output
+```
 * -i: path to image
 * -w: path to watermark image
 * -o: name of the output image
+```
 
 To add a watermark in the center of multiples images in a folder, run:
-> python main.py -d imgs/ -w nameWM.png
 
+> python main.py -d imgs/ -w nameWM.png
+```
 * -d: path to folder
 * -w: path to watermark image
+```
 
 To scale (resize) the watermark image and define a relative position in one image, run:
 
 > python main.py -i imgs/name.bmp -w nomeWM.png -s 10 -mt 25 -ml 25 -o name_output
-
+```
 * -i: path to image
 * -w: path to watermark image
 * -s: % scale size to watermark image
 * -mt: position in % from TOP margin
 * -ml: position in % from LEFT margin
 * -o: name of the output image
+```
 
 To scale (resize) the watermark image and define a relative position in multiples image in a folder, run:
 
 > python main.py -d imgs/ -w nomeWM.png -s 30 -mt 25 -ml 25
-
+```
 * -d: path to folder
 * -w: path to watermark image
 * -s: % scale size to watermark image
 * -mt: position in % from TOP margin
 * -ml: position in % from LEFT margin
-
+```
 
 Parameters:
-
+```
 > -i path to image
 >> ex: -i imagem/img.bmp
 
@@ -80,3 +168,4 @@ Parameters:
 
 > -p Add a prefix in the name of output image in a batch operation.
 >> ex: -p water
+```

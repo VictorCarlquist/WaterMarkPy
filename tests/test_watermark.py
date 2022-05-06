@@ -1,6 +1,8 @@
 import sys
-from watermarkpy import watermark
+
 from watermarkpy.watermark import WMImage
+from watermarkpy.scripts.image import main
+
 from PIL import Image
 import pytest
 from runpy import run_module
@@ -118,4 +120,4 @@ def test_batch(dir_path, p_wm, mt, ml, prefix, scale, alpha, adjust):
 )
 def test_run_module(param):
     sys.argv = param
-    watermark.main()
+    main()

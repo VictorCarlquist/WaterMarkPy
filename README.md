@@ -95,7 +95,7 @@ adjust_color = [True, False]
 
 To add a watermark in the center of one image, run:
 
-> python main.py -i name.bmp -w nameWM.png -o name_output
+> watermarkpy-image -i name.bmp -w nameWM.png -o name_output
 ```
 * -i: path to image
 * -w: path to watermark image
@@ -104,7 +104,7 @@ To add a watermark in the center of one image, run:
 
 To add a watermark in the center of multiples images in a folder, run:
 
-> python main.py -d imgs/ -w nameWM.png
+> watermarkpy-image -d imgs/ -w nameWM.png
 ```
 * -d: path to folder
 * -w: path to watermark image
@@ -112,7 +112,7 @@ To add a watermark in the center of multiples images in a folder, run:
 
 To scale (resize) the watermark image and define a relative position in one image, run:
 
-> python main.py -i imgs/name.bmp -w nomeWM.png -s 10 -mt 25 -ml 25 -o name_output
+> watermarkpy-image -i imgs/name.bmp -w nomeWM.png -s 10 -mt 25 -ml 25 -o name_output
 ```
 * -i: path to image
 * -w: path to watermark image
@@ -124,7 +124,7 @@ To scale (resize) the watermark image and define a relative position in one imag
 
 To scale (resize) the watermark image and define a relative position in multiples image in a folder, run:
 
-> python main.py -d imgs/ -w nomeWM.png -s 30 -mt 25 -ml 25
+> watermarkpy-image -d imgs/ -w nomeWM.png -s 30 -mt 25 -ml 25
 ```
 * -d: path to folder
 * -w: path to watermark image
@@ -136,13 +136,13 @@ To scale (resize) the watermark image and define a relative position in multiple
 Parameters:
 ```
 > -i path to image
->> ex: -i imagem/img.bmp
+>> ex: -i img/img.bmp
 
 > -w path to watermark image
->> ex: -i imagem/wm.bmp
+>> ex: -i img/wm.bmp
 
 > -d path to folder with image
->> ex: -d imagem/
+>> ex: -d img/
 
 > -s scale/resize (in %) watermark considering the dimensions of the main image
 >> ex: -s 30

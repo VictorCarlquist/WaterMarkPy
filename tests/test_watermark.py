@@ -1,7 +1,7 @@
 import sys
 
 from watermarkpy.watermark import WMImage
-from watermarkpy.commands.image import main
+from watermarkpy.watermark import main
 
 from PIL import Image
 import pytest

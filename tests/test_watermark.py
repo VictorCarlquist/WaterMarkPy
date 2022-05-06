@@ -1,11 +1,10 @@
 import sys
 
 from watermarkpy.watermark import WMImage
-from watermarkpy.scripts.image import main
+from watermarkpy.commands.image import main
 
 from PIL import Image
 import pytest
-from runpy import run_module
 
 
 @pytest.mark.parametrize(

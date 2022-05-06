@@ -6,7 +6,9 @@
 
 ---
 
-WaterMarkPy is a simple free open-source library to add watermark in images. The WaterMarkPy keeps the watermark in the same locate and in the same size in the image despite of the image resolution, because the WaterMarkPy uses percent (\%) unit to position the watermark.
+WaterMarkPy is a simple free open-source library to add watermark in images. The WaterMarkPy keeps the watermark with the same locate and with the same size in the image despite of the image resolution, because the WaterMarkPy uses percent (\%) unit to position the watermark.
+
+You can find the source code at: [https://github.com/VictorCarlquist/WaterMarkPy/](https://github.com/VictorCarlquist/WaterMarkPy/),
 
 Install
 ---
